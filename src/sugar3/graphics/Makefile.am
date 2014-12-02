@@ -9,6 +9,7 @@ sugar_PYTHON =              \
 	progressicon.py         \
 	__init__.py             \
 	menuitem.py             \
+	messagebox.py           \
 	notebook.py             \
 	objectchooser.py        \
 	palettegroup.py         \
