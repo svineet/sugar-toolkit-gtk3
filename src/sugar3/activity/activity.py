@@ -57,6 +57,7 @@ from functools import partial
 import StringIO
 import cairo
 import json
+import subprocess
 
 from gi.repository import Gtk
 from gi.repository import Gdk
@@ -662,6 +663,36 @@ class Activity(Window, Gtk.Container):
         this file_path.
         """
         raise NotImplementedError
+
+    def add_badge(self, icon, name, message, icon_dir=None):
+        sugar_icons = os.path.join(os.path.expanduser('~'), '.icons')
+        if not os.path.exists(sugar_icons):
+            try:
+                subprocess.call(['mkdir', sugar_icons])
+            except OSError as e:
+                logging.error('Could not mkdir %s, %s' % (sugar_icons, e))
+
+        badge = {
+            'icon': icon,
+            'from': name,
+            'message': message
+        }
+
+        if icon_dir is None:
+            icon_dir = os.path.join(get_bundle_path(), 'icons')
+        icon_path = os.path.join(icon_dir, icon + '.svg')
+        try:
+            subprocess.call(['cp', icon_path, sugar_icons])
+        except OSError as e:
+            logging.error('Could not copy %s to %s, %s' %
+                          (icon_path, sugar_icons, e))
+
+        if 'comments' in self.metadata:
+            comments = json.loads(self.metadata['comments'])
+            comments.append(badge)
+            self.metadata['comments'] = json.dumps(comments)
+        else:
+            self.metadata['comments'] = json.dumps([badge])
 
     def notify_user(self, summary, body):
         """
